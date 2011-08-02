@@ -1,7 +1,10 @@
 
-# ENV['EXECJS_RUNTIME'] = 'RubyRhino'
+ENV['EXECJS_RUNTIME'] = 'RubyRhino'
 
 require 'rubygems'
+
+require 'ruby-debug'
+Debugger.start
 
 require 'citeproc'
 

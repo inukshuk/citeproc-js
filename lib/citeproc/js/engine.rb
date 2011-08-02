@@ -10,6 +10,7 @@ module CiteProc
 
       @name = 'citeproc-js'.freeze
       @type = 'CSL'.freeze
+      @version = '1.0'
       @priority = 0
       
       @path = File.expand_path('../support', __FILE__)
@@ -35,11 +36,6 @@ module CiteProc
           ].map { |s| File.open(File.join(path,s), 'r:UTF-8').read }.join.freeze        
         end
 
-        # Returns the supported CSL version.
-        def version
-          @version ||= source.scan(/^\s*this.csl_version = "([\d\.]+)";\s*$/).flatten[0].to_s.freeze
-        end
-
         # Returns the citeproc-js version number.
         def processor_version
           @processor_version ||= source.scan(/^\s*this.processor_version = "([\d\.]+)";\s*$/).flatten[0].to_s.freeze
@@ -50,8 +46,8 @@ module CiteProc
         return if started?
         
         @context = ExecJS.compile(Engine.source)
-        update
-        @context.eval("citeproc = new CSL.Engine(system, #{ style }, #{ options[:locale] })")
+        update_system
+        @context.eval("citeproc = new CSL.Engine(system, #{ style.inspect }, #{ options[:locale].inspect })")
         
         super
       rescue => e
@@ -62,7 +58,8 @@ module CiteProc
         @context = nil
         super
       end
-                  
+      
+            
       def process
         @context.exec(<<-END)
           //var cad1 = citeproc.appendCitationCluster(citationCAD1);
@@ -70,21 +67,19 @@ module CiteProc
           //var cad3 = citeproc.appendCitationCluster(citationCAD3);
           
           //citeproc.updateItems(['ITEM-1']);
-          return 'hello';
+          return citeproc.processor_version;
         END
       end
 
-      private
-      
-      def update(*arguments)
-        @context.call('system.update', MultiJson.encode(arguments))
-      end
-
-      def encode(*arguments)
+      def update_system(*arguments)
         arguments = [:abbreviations, :items, :locales] if arguments.empty?
-        Hash[*arguments.flatten.map { |a| [a, MultiJson.encode(send(a))] }.flatten]
+        @context.eval('system.update(%s)' % MultiJson.encode(Hash[*arguments.flatten.map { |a| [a, send(a)] }.flatten]))
       end
 
+      def processor_version
+        @context.exec('return citeproc.processor_version;')
+      end
+      
     end
     
   end

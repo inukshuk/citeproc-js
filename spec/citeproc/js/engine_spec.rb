@@ -9,6 +9,7 @@ module CiteProc
           p = double(:processor)
           p.stub(:options).and_return { Processor.defaults }
           p.stub(:abbreviations).and_return { { :default => {} } }
+          p.stub(:items).and_return { {} }
           e.processor = p
           e.style = load_style('apa')
           e.locales = { :'en-US' => load_locale('en-US') }
@@ -34,15 +35,14 @@ module CiteProc
           subject.type.should == 'CSL'
         end
       end
-            
-      context 'processing' do
+      
+      describe '#processor_version' do
         before(:each) { subject.start }
         after(:each) { subject.stop }
         
-        it 'should not fail' do
-          subject.process.should == 'hello'
+        it 'returns the citeproc-js version' do
+          subject.processor_version.should =~ /^[\d\.]+$/
         end
-        
       end
       
     end  
