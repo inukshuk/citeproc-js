@@ -11,16 +11,17 @@ Gem::Specification.new do |s|
   s.authors     = ['Sylvester Keil']
   s.email       = 'http://sylvester.keil.or.at'
   s.homepage    = 'http://inukshuk.github.com/citeproc-js'
-  s.summary     = 'A Ruby wrapper around citeproc-js.'
-  s.description = 'A Ruby wrapper around the citeproc-js CSL (Citation Style Language) processor.'
+  s.summary     = 'A citeproc engine based on citeproc-js.'
+  s.description = 'A citeproc engine based on the citeproc-js CSL (Citation Style Language) processor.'
   s.license     = 'AGPLv3'
   s.date        = Time.now.strftime('%Y-%m-%d')
 
-  s.add_runtime_dependency('execjs', ['~> 1.2'])
+  s.add_runtime_dependency('citeproc', ['~>0.0'])
+  s.add_runtime_dependency('execjs', ['~>1.2'])
 
-  s.add_development_dependency('cucumber', ['>= 1.0.2'])
-  s.add_development_dependency('rspec', ['>= 2.6.0'])
-  s.add_development_dependency('watchr', ['>= 0.7'])
+  s.add_development_dependency('cucumber', ['>=1.0.2'])
+  s.add_development_dependency('rspec', ['>=2.6.0'])
+  s.add_development_dependency('watchr', ['>=0.7'])
 
   s.files        = `git ls-files`.split("\n")
   s.test_files   = `git ls-files -- {test,spec,features}/*`.split("\n")

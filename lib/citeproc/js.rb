@@ -1,7 +1,9 @@
 
-require 'execjs'
-require 'json'
+# ENV['EXECJS_RUNTIME'] = 'RubyRhino'
+
+require 'rubygems'
+
+require 'citeproc'
 
 require 'citeproc/js/version'
-require 'citeproc/js/processor'
-require 'citeproc/js/utilities'
+require 'citeproc/js/engine'
