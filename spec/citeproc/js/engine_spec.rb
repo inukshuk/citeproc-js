@@ -8,8 +8,7 @@ module CiteProc
         Engine.new do |e|
           p = double(:processor)
           p.stub(:options).and_return { Processor.defaults }
-          p.stub(:abbreviations).and_return { { :default => {} } }
-          p.stub(:items).and_return { {} }
+          p.stub(:items).and_return { load_items('items') }
           e.processor = p
           e.style = load_style('apa')
           e.locales = { :'en-US' => load_locale('en-US') }
@@ -36,13 +35,55 @@ module CiteProc
         end
       end
       
-      describe '#processor_version' do
+      context 'when started' do
         before(:each) { subject.start }
         after(:each) { subject.stop }
-        
-        it 'returns the citeproc-js version' do
-          subject.processor_version.should =~ /^[\d\.]+$/
+
+        describe '#processor_version' do  
+          it 'returns the citeproc-js version' do
+            subject.processor_version.should =~ /^[\d\.]+$/
+          end
         end
+        
+        describe '#flags' do
+          it 'returns a hash of flags' do
+            subject.flags.should have_key('sort_citations')
+          end
+        end
+
+        describe '#default_namespace=' do
+          it 'sets the abbreviation namespace' do
+            lambda { subject.default_namespace = :default }.should_not raise_error
+          end
+        end
+
+        describe '#registry' do
+          it 'returns the registry object' do
+            subject.registry.should_not be nil # TODO convert
+          end
+        end
+        
+        describe '#update_items' do
+          it 'given a list of ids, loads the corresponding items into the engine' do
+            subject.update_items(['ITEM-1']).should == ['ITEM-1']
+          end
+        end
+        
+        describe '#bibliography' do
+          it 'returns an empty bibliography by default' do
+            subject.bibliography.should be_empty
+          end
+
+          describe 'when items were processed' do
+            before(:each) { subject.update_items(['ITEM-1']) }
+            
+            it 'returns the bibliography when at least one item was processed' do
+              subject.bibliography.should_not be_empty
+            end
+            
+          end
+        end
+        
       end
       
     end  

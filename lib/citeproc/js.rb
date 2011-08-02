@@ -9,4 +9,5 @@ Debugger.start
 require 'citeproc'
 
 require 'citeproc/js/version'
+require 'citeproc/js/proxy'
 require 'citeproc/js/engine'

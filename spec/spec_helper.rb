@@ -16,6 +16,10 @@ module Fixtures
     load("styles/#{style}.csl")
   end
   
+  def load_items(items)
+    MultiJson.decode(load("items/#{items}.json"), :symbolize_keys => true)
+  end
+  
 end
 
 RSpec.configure do |config|

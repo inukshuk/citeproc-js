@@ -49,6 +49,8 @@ module CiteProc
         update_system
         @context.eval("citeproc = new CSL.Engine(system, #{ style.inspect }, #{ options[:locale].inspect })")
         
+        set_output_format(options[:format])
+        
         super
       rescue => e
         raise EngineError.new('failed to start engine', e)
@@ -76,9 +78,48 @@ module CiteProc
         @context.eval('system.update(%s)' % MultiJson.encode(Hash[*arguments.flatten.map { |a| [a, send(a)] }.flatten]))
       end
 
-      def processor_version
-        @context.exec('return citeproc.processor_version;')
+      %w{ processor_version csl_version registry }.each do |attribute|
+        define_method(attribute) do
+          @context.eval(['citeproc',attribute].join('.'))
+        end
       end
+      
+      # Sets the output format.
+      def format=(format)
+        @context.eval("citeproc.setOutputFormat(#{ format.to_s.inspect })"); format
+      end
+      
+      alias set_output_format format=
+      
+      def default_namespace=(namespace)
+        @context.eval("citeproc.setAbbreviations(#{ namespace.to_s.inspect })")
+        @default_namespace = namespace.to_sym
+      end
+
+      alias set_abbreviations default_namespace=
+      
+      def opt
+        @context.eval('citeproc.opt')
+      end
+      
+      alias flags opt
+      
+      # Loads items into citeproc-js. Available options:
+      # :sort: sort items in bibliography depending on style; if set to false
+      #        sorting will be suppressed; true by default.
+      def update_items(items, options = {})
+        @context.eval('citeproc.updateItems(%s,%s)' % [MultiJson.encode(items), !options[:sort]])
+      end
+      
+      def update_uncited_items(items, options = {})
+        @context.eval('citeproc.updateUncitedItems(%s,%s)' % [MultiJson.encode(items), !options[:sort]])
+      end
+
+      def make_bibliography
+        @context.eval('citeproc.makeBibliography()')[1]
+      end
+      
+      alias bibliography make_bibliography
       
     end
     

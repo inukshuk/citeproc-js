@@ -1,0 +1,22 @@
+{
+	"ITEM-1": {
+		"id": "ITEM-1",
+		"title":"Boundaries of Dissent: Protest and State Power in the Media Age",
+		"author": [
+			{
+				"family": "D'Arcus",
+				"given": "Bruce",
+				"static-ordering": false
+			}
+		],
+        "note":"The apostrophe in Bruce's name appears in proper typeset form.",
+		"publisher": "Routledge",
+        "publisher-place": "New York",
+		"issued": {
+			"date-parts":[
+				[2006]
+			]
+		},
+		"type": "book"
+	}
+}
