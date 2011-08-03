@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.date        = Time.now.strftime('%Y-%m-%d')
 
   s.add_runtime_dependency('citeproc', ['~>0.0'])
-  s.add_runtime_dependency('execjs', ['~>1.2'])
+  s.add_runtime_dependency('execjs', ['>=1.2.1', '<1.3.0'])
 
   s.add_development_dependency('cucumber', ['>=1.0.2'])
   s.add_development_dependency('rspec', ['>=2.6.0'])
