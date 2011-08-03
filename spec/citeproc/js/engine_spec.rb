@@ -58,14 +58,15 @@ module CiteProc
         end
 
         describe '#registry' do
-          it 'returns the registry object' do
-            subject.registry.should_not be nil # TODO convert
+          it 'is a hash' do
+            subject.registry.should be_a(Hash)
           end
         end
         
         describe '#update_items' do
           it 'given a list of ids, loads the corresponding items into the engine' do
-            subject.update_items(['ITEM-1']).should == ['ITEM-1']
+            expect { subject.update_items(['ITEM-1']) }.to
+              change { subject.registry[:inserts].length }.by(1)
           end
         end
         

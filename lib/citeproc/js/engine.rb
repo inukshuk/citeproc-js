@@ -16,7 +16,7 @@ module CiteProc
       @path = File.expand_path('../support', __FILE__)
 
       class << self
-        
+          
         attr_reader :path
         
         def parser
@@ -36,23 +36,61 @@ module CiteProc
           ].map { |s| File.open(File.join(path,s), 'r:UTF-8').read }.join.freeze        
         end
 
-        # Returns the citeproc-js version number.
-        def processor_version
-          @processor_version ||= source.scan(/^\s*this.processor_version = "([\d\.]+)";\s*$/).flatten[0].to_s.freeze
+        private
+        
+        def attr_context(*arguments)
+          arguments.flatten.each do |m|
+            define_method(underscore(m)) do
+              delegate("citeproc.#{m}")
+            end
+          end
         end
+        
+        def delegate_context(*arguments)
+          arguments.flatten.each do |m|
+            define_method(underscore(m)) do |*args|
+              delegate("citeproc.#{m}(#{args.map { |a| MultiJson.encode(a) }.join(',')})")
+            end
+          end
+        end
+        
+        def underscore(javascript_method)
+          word = javascript_method.to_s.split(/\./)[-1]
+          word.gsub!(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
+          word.gsub!(/([a-z\d])([A-Z])/, '\1_\2')
+          word.downcase!
+          word
+        end
+      end
+      
+      
+      #
+      # instance methods
+      #
+      
+      attr_context :processor_version, :csl_version, :opt
+      alias flags opt
+
+      delegate_context :setOutputFormat
+      alias format= set_output_format
+  
+      def registry
+        @registry ||= Hash.new { |h,k| delegate("citeproc.registry.#{k}") }
       end
       
       def start
         return if started?
-        
+        super
+
         @context = ExecJS.compile(Engine.source)
         update_system
-        @context.eval("citeproc = new CSL.Engine(system, #{ style.inspect }, #{ options[:locale].inspect })")
+        @context.exec("citeproc = new CSL.Engine(system, #{ style.inspect }, #{ options[:locale].inspect })")
         
         set_output_format(options[:format])
         
-        super
+        self
       rescue => e
+        stop
         raise EngineError.new('failed to start engine', e)
       end
       
@@ -78,35 +116,15 @@ module CiteProc
         @context.eval('system.update(%s)' % MultiJson.encode(Hash[*arguments.flatten.map { |a| [a, send(a)] }.flatten]))
       end
 
-      %w{ processor_version csl_version registry }.each do |attribute|
-        define_method(attribute) do
-          @context.eval(['citeproc',attribute].join('.'))
-        end
-      end
       
-      # Sets the output format.
-      def format=(format)
-        @context.eval("citeproc.setOutputFormat(#{ format.to_s.inspect })"); format
-      end
-      
-      alias set_output_format format=
-      
-      def default_namespace=(namespace)
+      def set_abbreviations(namespace)
         @context.eval("citeproc.setAbbreviations(#{ namespace.to_s.inspect })")
         @default_namespace = namespace.to_sym
       end
 
-      alias set_abbreviations default_namespace=
+      alias default_namespace= set_abbreviations
+
       
-      def opt
-        @context.eval('citeproc.opt')
-      end
-      
-      alias flags opt
-      
-      # Loads items into citeproc-js. Available options:
-      # :sort: sort items in bibliography depending on style; if set to false
-      #        sorting will be suppressed; true by default.
       def update_items(items, options = {})
         @context.eval('citeproc.updateItems(%s,%s)' % [MultiJson.encode(items), !options[:sort]])
       end
@@ -121,6 +139,15 @@ module CiteProc
       
       alias bibliography make_bibliography
       
+      private
+      
+      def delegate(script, method = :eval)
+        if running?
+          @context.send(method, script)
+        else
+          warn "not executing script: engine has not been started"
+        end
+      end
     end
     
   end
