@@ -9,15 +9,14 @@ Gem::Specification.new do |s|
   s.version     = CiteProc::JS::VERSION.dup
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Sylvester Keil']
-  s.email       = 'http://sylvester.keil.or.at'
+  s.email       = ['http://sylvester.keil.or.at']
   s.homepage    = 'http://inukshuk.github.com/citeproc-js'
   s.summary     = 'A citeproc engine based on citeproc-js.'
   s.description = 'A citeproc engine based on the citeproc-js CSL (Citation Style Language) processor.'
   s.license     = 'AGPLv3'
-  s.date        = Time.now.strftime('%Y-%m-%d')
 
   s.add_runtime_dependency('citeproc', ['~>0.0'])
-  s.add_runtime_dependency('execjs', ['>=1.2.1', '<1.3.0'])
+  s.add_runtime_dependency('execjs', ['~>1.2.3'])
 
   s.add_development_dependency('cucumber', ['>=1.0.2'])
   s.add_development_dependency('rspec', ['>=2.6.0'])

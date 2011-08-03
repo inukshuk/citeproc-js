@@ -69,20 +69,33 @@ module CiteProc
               change { subject.registry[:inserts].length }.by(1)
           end
         end
-        
+
         describe '#bibliography' do
           it 'returns an empty bibliography by default' do
-            subject.bibliography.should be_empty
+            subject.bibliography[1].should be_empty
           end
 
           describe 'when items were processed' do
             before(:each) { subject.update_items(['ITEM-1']) }
             
             it 'returns the bibliography when at least one item was processed' do
-              subject.bibliography.should_not be_empty
+              subject.bibliography[1].should_not be_empty
             end
-            
           end
+        end
+        
+        describe '#sorted_registry_items' do
+          it 'returns an empty bibliography by default' do
+            subject.sorted_registry_items.should be_empty
+          end
+
+          describe 'when items were processed' do
+            before(:each) { subject.update_items(['ITEM-1']) }
+            
+            it 'returns the bibliography when at least one item was processed' do
+              subject.sorted_registry_items.should_not be_empty
+            end
+          end        
         end
         
       end

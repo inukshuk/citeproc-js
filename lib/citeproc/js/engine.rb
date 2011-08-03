@@ -41,7 +41,7 @@ module CiteProc
         def attr_context(*arguments)
           arguments.flatten.each do |m|
             define_method(underscore(m)) do
-              delegate("citeproc.#{m}")
+              delegate "citeproc.#{m}"
             end
           end
         end
@@ -49,7 +49,7 @@ module CiteProc
         def delegate_context(*arguments)
           arguments.flatten.each do |m|
             define_method(underscore(m)) do |*args|
-              delegate("citeproc.#{m}(#{args.map { |a| MultiJson.encode(a) }.join(',')})")
+              delegate "citeproc.#{m}(#{args.map { |a| MultiJson.encode(a) }.join(',')})"
             end
           end
         end
@@ -69,14 +69,31 @@ module CiteProc
       #
       
       attr_context :processor_version, :csl_version, :opt
+
       alias flags opt
 
-      delegate_context :setOutputFormat
+      delegate_context %w{ setOutputFormat updateItems updateUncitedItems
+        makeBibliography appendCitationCluster processCitationCluster
+        previewCitationCluster registry.getSortedRegistryItems }
+        
       alias format= set_output_format
-  
-      def registry
-        @registry ||= Hash.new { |h,k| delegate("citeproc.registry.#{k}") }
+      alias bibliography make_bibliography
+
+      alias sorted_registry_items get_sorted_registry_items
+
+      %w{ append process preview }.each do |m|
+        alias_method m, "#{m}_citation_cluster"
       end
+      
+      def registry
+        @registry ||= Hash.new { |h,k| delegate "citeproc.registry.#{k}" }
+      end
+      
+      def citation_registry
+        @citation_registry ||= Hash.new { |h,k| registry["citationreg.#{k}"] }
+      end
+      
+      def language; options[:locale]; end
       
       def start
         return if started?
@@ -84,8 +101,7 @@ module CiteProc
 
         @context = ExecJS.compile(Engine.source)
         update_system
-        @context.exec("citeproc = new CSL.Engine(system, #{ style.inspect }, #{ options[:locale].inspect })")
-        
+        delegate "citeproc = new CSL.Engine(system, #{style.inspect}, #{language.inspect})", :exec
         set_output_format(options[:format])
         
         self
@@ -99,47 +115,19 @@ module CiteProc
         super
       end
       
-            
-      def process
-        @context.exec(<<-END)
-          //var cad1 = citeproc.appendCitationCluster(citationCAD1);
-          //var cad2 = citeproc.appendCitationCluster(citationCAD2);
-          //var cad3 = citeproc.appendCitationCluster(citationCAD3);
-          
-          //citeproc.updateItems(['ITEM-1']);
-          return citeproc.processor_version;
-        END
-      end
-
-      def update_system(*arguments)
-        arguments = [:abbreviations, :items, :locales] if arguments.empty?
-        @context.eval('system.update(%s)' % MultiJson.encode(Hash[*arguments.flatten.map { |a| [a, send(a)] }.flatten]))
-      end
-
-      
       def set_abbreviations(namespace)
-        @context.eval("citeproc.setAbbreviations(#{ namespace.to_s.inspect })")
+        delegate "citeproc.setAbbreviations(#{ namespace.to_s.inspect })"
         @default_namespace = namespace.to_sym
       end
 
       alias default_namespace= set_abbreviations
-
-      
-      def update_items(items, options = {})
-        @context.eval('citeproc.updateItems(%s,%s)' % [MultiJson.encode(items), !options[:sort]])
-      end
-      
-      def update_uncited_items(items, options = {})
-        @context.eval('citeproc.updateUncitedItems(%s,%s)' % [MultiJson.encode(items), !options[:sort]])
-      end
-
-      def make_bibliography
-        @context.eval('citeproc.makeBibliography()')[1]
-      end
-      
-      alias bibliography make_bibliography
       
       private
+
+      def update_system(*arguments)
+        arguments = [:abbreviations, :items, :locales] if arguments.empty?
+        delegate "system.update(#{ MultiJson.encode(Hash[*arguments.flatten.map { |a| [a, send(a)] }.flatten]) })"
+      end
       
       def delegate(script, method = :eval)
         if running?
@@ -147,7 +135,10 @@ module CiteProc
         else
           warn "not executing script: engine has not been started"
         end
+      rescue => e
+        raise EngineError.new('failed to execute javascript:', e)
       end
+      
     end
     
   end
