@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.license     = 'AGPLv3'
 
   s.add_runtime_dependency('citeproc', ['~>0.0'])
-  s.add_runtime_dependency('execjs', ['~>1.2.3'])
+  s.add_runtime_dependency('execjs', ['>=1.2.4', '<1.3.0'])
 
   s.add_development_dependency('cucumber', ['>=1.0.2'])
   s.add_development_dependency('rspec', ['>=2.6.0'])
