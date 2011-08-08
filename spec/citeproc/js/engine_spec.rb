@@ -3,19 +3,37 @@ require 'spec_helper'
 module CiteProc
   module JS
     describe 'Engine' do
-
+      before(:all) do
+        Style.root = File.expand_path('../../../fixtures/styles', __FILE__)
+        Locale.root = File.expand_path('../../../fixtures/locales', __FILE__)
+      end
+      
       let(:subject) do
         Engine.new do |e|
           p = double(:processor)
           p.stub(:options).and_return { Processor.defaults }
           p.stub(:items).and_return { load_items('items') }
           e.processor = p
-          e.style = load_style('apa')
-          e.locales = { :'en-US' => load_locale('en-US') }
         end
       end
       
       it { should_not be nil }
+      
+      describe '#style' do
+        let(:apa) { load_style('apa') }
+        it 'accepts a style name' do
+          subject.style = :apa
+          subject.style.to_s.should == apa
+        end
+        it 'accepts a style name with extension' do
+          subject.style = 'apa.csl'
+          subject.style.to_s.should == apa
+        end
+        it 'accepts a full style' do
+          subject.style = apa
+          subject.style.to_s.should == apa
+        end
+      end
       
       describe '#version' do
         it 'returns a 1.x version string' do
@@ -36,7 +54,12 @@ module CiteProc
       end
       
       context 'when started' do
-        before(:each) { subject.start }
+        before(:each) do
+          subject.style = :apa
+          subject.locales = :'en-US'
+          subject.start
+        end
+        
         after(:each) { subject.stop }
 
         describe '#processor_version' do  

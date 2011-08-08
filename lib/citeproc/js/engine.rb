@@ -63,10 +63,25 @@ module CiteProc
         end
       end
       
+
+      def initialize(attributes = {})
+        super
+        
+        self.style = attributes[:style] if attributes.has_key?(:style)
+        self.locales = attributes[:locale] if attributes.has_key?(:locale)
+      end
       
       #
       # instance methods
       #
+
+      def style=(style)
+        @style = Style.load(style.to_s)
+      end
+      
+      def locales=(locale)
+        @locales = { locale.to_sym => Locale.load(locale.to_s) }
+      end
       
       attr_context :processor_version, :csl_version, :opt
 
