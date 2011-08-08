@@ -64,13 +64,6 @@ module CiteProc
       end
       
 
-      def initialize(attributes = {})
-        super
-        
-        self.style = attributes[:style] if attributes.has_key?(:style)
-        self.locales = attributes[:locale] if attributes.has_key?(:locale)
-      end
-      
       #
       # instance methods
       #
@@ -114,8 +107,12 @@ module CiteProc
         return if started?
         super
 
+        self.style = processor.options[:style] if @style.nil?
+        self.locales = processor.options[:locale] if @locales.nil?
+
         @context = ExecJS.compile(Engine.source)
         update_system
+        
         delegate "citeproc = new CSL.Engine(system, #{style.inspect}, #{language.inspect})", :exec
         set_output_format(options[:format])
         
