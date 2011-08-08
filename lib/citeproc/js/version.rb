@@ -1,5 +1,5 @@
 module CiteProc
   module JS
-    VERSION = '0.0.1.pre.2'.freeze
+    VERSION = '0.0.1'.freeze
   end
 end
