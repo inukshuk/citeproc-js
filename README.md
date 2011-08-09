@@ -7,6 +7,16 @@ thin Ruby wrapper around Frank G. Benett's awesome
 [citeproc-js](https://bitbucket.org/fbennett/citeproc-js/overview).
 
 
+Requirements
+------------
+
+In addition to the dependencies defined by the gem, please make sure to
+your environment meets the following requirements depending on your platform;
+
+* For Ruby 1.8.7, please install [johnson](https://github.com/jbarnette/johnson).
+* For JRuby, please install [therubyrhino](https://github.com/cowboyd/therubyrhino).
+
+Support for other platforms is still in development.
 
 
 License
