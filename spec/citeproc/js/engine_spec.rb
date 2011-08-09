@@ -54,13 +54,17 @@ module CiteProc
       end
       
       context 'when started' do
-        before(:each) do
-          subject.style = :apa
-          subject.locales = :'en-US'
-          subject.start
+        let(:subject) do
+          Engine.new do |e|
+            p = double(:processor)
+            p.stub(:options).and_return { Processor.defaults }
+            p.stub(:items).and_return { load_items('items') }
+            e.processor = p
+            e.style = :apa
+            e.locales = :'en-US'
+            e.start
+          end
         end
-        
-        after(:each) { subject.stop }
 
         describe '#processor_version' do  
           it 'returns the citeproc-js version' do

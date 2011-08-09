@@ -20,8 +20,15 @@ module CiteProc
       describe 'Style' do
 
         before(:all) do
+          @default_root = Style.root
+          @default_extension = Style.extension
           Style.root = root
           Style.extension = extension
+        end
+        
+        after(:all) do
+          Style.root = @default_root
+          Style.extension = @default_extension
         end
       
         describe '.load' do  
