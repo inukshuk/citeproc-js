@@ -1,7 +1,3 @@
-require 'multi_json'
-require 'execjs'
-
-require 'forwardable'
 
 module CiteProc
   module JS

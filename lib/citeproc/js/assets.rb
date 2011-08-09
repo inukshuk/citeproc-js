@@ -43,7 +43,7 @@ module CiteProc
         end
 
         def extend_name(file)
-          file = File.extname(file).empty? ? [file, extension].compact.join('.') : file
+          file = File.extname(file).empty? ? [file, extension].compact.join : file
           file = file.start_with?(prefix.to_s) ? file : [prefix,file].join
           file
         end
@@ -54,13 +54,13 @@ module CiteProc
     class Style
       include Asset
       @root = '/usr/local/share/citation-style-language/styles'.freeze
-      @extension = 'csl'.freeze
+      @extension = '.csl'.freeze
     end
     
     class Locale
       include Asset
       @root = '/usr/local/share/citation-style-language/locales'.freeze
-      @extension = 'xml'.freeze
+      @extension = '.xml'.freeze
       @prefix = 'locales-'
     end
     
