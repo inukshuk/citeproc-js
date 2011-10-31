@@ -13,7 +13,10 @@ Requirements
 In addition to the dependencies defined by the gem, please make sure to
 your environment meets the following requirements depending on your platform;
 
-* For Ruby 1.8.7, please install [johnson](https://github.com/jbarnette/johnson).
+* For Ruby 1.9, please install this [experimental branch of johnson](https://github.com/inukshuk/johnson):
+  download/clone the repository and run `rake compile` followed by `rake gem`;
+  find and install the pre-release gem in the `pkg` directory.
+* For Ruby 1.8.7, please install stable [johnson](https://github.com/jbarnette/johnson).
 * For JRuby, please install [therubyrhino](https://github.com/cowboyd/therubyrhino).
 
 Support for other platforms is still in development.

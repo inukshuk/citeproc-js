@@ -1,9 +1,7 @@
 
 require 'citeproc/js/compatibility'
 
-ruby_18 do
-  ENV['EXECJS_RUNTIME'] = 'Johnson'
-end
+ENV['EXECJS_RUNTIME'] = 'Johnson'
 
 jruby do
   ENV['EXECJS_RUNTIME'] = 'RubyRhino'
