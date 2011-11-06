@@ -9,9 +9,9 @@
 				"static-ordering": false
 			}
 		],
-        "note":"The apostrophe in Bruce's name appears in proper typeset form.",
+    "note":"The apostrophe in Bruce's name appears in proper typeset form.",
 		"publisher": "Routledge",
-        "publisher-place": "New York",
+    "publisher-place": "New York",
 		"issued": {
 			"date-parts":[
 				[2006]

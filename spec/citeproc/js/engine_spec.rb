@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 require 'spec_helper'
 
 module CiteProc
@@ -76,18 +78,39 @@ module CiteProc
 
       describe '#bibliography' do
         it 'returns an empty bibliography by default' do
-          engine.bibliography[1].should be_empty
+          engine.bibliography.should be_empty
         end
 
-        describe 'when items were processed' do
+        describe 'when items were updated' do
           before(:each) { engine.update_items(['ITEM-1']) }
 
           it 'returns the bibliography when at least one item was processed' do
-            engine.bibliography[1].should_not be_empty
+            engine.bibliography.should_not be_empty
+          end
+          
+          it 'the bibliography contains the processed items' do
+            engine.bibliography[0].should match(/Boundaries of Dissent/)
           end
         end
       end
 
+      describe '#append' do
+                  
+        it 'returns the citation id and string for the item' do
+          engine.append(CitationData.new([{:id => 'ITEM-1'}]))[0][1].should == '(D’Arcus, 2006)'
+        end
+        
+        it 'increases the citation index on subsequent calls' do
+          x = engine.append(CitationData.new([{:id => 'ITEM-1'}]))[0][0]
+          engine.append(CitationData.new([{:id => 'ITEM-1'}]))[0][0].should > x
+        end
+        
+        it 'includes the locator' do
+          engine.append(CitationData.new([{:id => 'ITEM-1', :locator => 'PAGE'}]))[0][1].should match(/PAGE/)
+        end
+        
+      end
+      
       describe '#sorted_registry_items' do
         it 'returns an empty bibliography by default' do
           engine.sorted_registry_items.should be_empty

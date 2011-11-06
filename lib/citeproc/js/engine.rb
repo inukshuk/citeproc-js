@@ -70,7 +70,6 @@ module CiteProc
         previewCitationCluster registry.getSortedRegistryItems }
 
       alias format= set_output_format
-      alias bibliography make_bibliography
 
       alias sorted_registry_items get_sorted_registry_items
 
@@ -78,7 +77,7 @@ module CiteProc
         alias_method m, "#{m}_citation_cluster"
       end
 
-      # Don't expose all duplicates to public interface
+      # Don't expose all delegates to public interface
       private :opt, :append_citation_cluster, :process_citation_cluster,
         :set_output_format, :make_bibliography, :preview_citation_cluster,
         :get_sorted_registry_items
@@ -109,9 +108,15 @@ module CiteProc
         @namespace = namespace.to_sym
       end
 
-
+      def bibliography(selector = Selector.new)
+        Bibliography(make_bibliography(selector.to_citeproc))
+      end
+            
+      def append(citation)
+        append_citation_cluster(citation.to_citeproc, false)
+      end
+      
       private
-
 
       def context
         @context || compile_context
