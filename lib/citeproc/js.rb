@@ -20,5 +20,4 @@ require 'forwardable'
 require 'citeproc'
 
 require 'citeproc/js/version'
-require 'citeproc/js/assets'
 require 'citeproc/js/engine'

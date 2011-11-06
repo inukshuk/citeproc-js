@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.description = 'A citeproc engine based on the citeproc-js CSL (Citation Style Language) processor.'
   s.license     = 'AGPLv3'
 
-  s.add_runtime_dependency('citeproc', ['~>0.0'])
+  s.add_runtime_dependency('citeproc', ['~>0.0.5'])
   s.add_runtime_dependency('execjs', ['>=1.2.4', '<1.3.0'])
 
   s.add_development_dependency('cucumber', ['>=1.0.2'])
@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   s.executables  = []
   s.require_path = 'lib'
 
-  s.rdoc_options      = %w{--line-numbers --inline-source --title "CiteProc-JS\ Rubygem" --main README.md --webcvs=http://github.com/inukshuk/citeproc-js/tree/master/}
+  s.rdoc_options      = %w{--line-numbers --inline-source --title "CiteProc-JS" --main README.md --webcvs=http://github.com/inukshuk/citeproc-js/tree/master/}
   s.extra_rdoc_files  = %w{README.md}
   
 end

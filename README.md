@@ -3,7 +3,7 @@ CiteProc::JS Engine
 
 CiteProc::JS Engine is a CSL 1.0 compatible engine for
 [citeproc](http://rubygems.org/gems/citeproc); it is implemented as a
-thin Ruby wrapper around Frank G. Benett's awesome
+thin Ruby wrapper around Frank G. Bennett's awesome
 [citeproc-js](https://bitbucket.org/fbennett/citeproc-js/overview).
 
 

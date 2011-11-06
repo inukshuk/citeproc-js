@@ -1,29 +1,29 @@
 
 module CiteProc
   module JS
-    
+
     class Engine < CiteProc::Engine
 
       @name = 'citeproc-js'.freeze
       @type = 'CSL'.freeze
       @version = '1.0'
       @priority = 0
-      
+
       @path = File.expand_path('../support', __FILE__)
 
       class << self
-          
+
         attr_reader :path
-        
+
         def parser
           ExecJS.runtime.name =~ /rhino|spidermonkey/i ? 'xmle4x.js' : 'xmldom.js'
         end
-        
+
         # Returns the citeproc-js JavaScript code.
         def source
           @source || reload
         end
-        
+
         # Forces a reload citeproc-js JavaScript code. Returns the source
         # code.
         def reload
@@ -33,7 +33,7 @@ module CiteProc
         end
 
         private
-        
+
         def attr_context(*arguments)
           arguments.flatten.each do |m|
             define_method(underscore(m)) do
@@ -41,7 +41,7 @@ module CiteProc
             end
           end
         end
-        
+
         def delegate_context(*arguments)
           arguments.flatten.each do |m|
             define_method(underscore(m)) do |*args|
@@ -49,7 +49,7 @@ module CiteProc
             end
           end
         end
-        
+
         def underscore(javascript_method)
           word = javascript_method.to_s.split(/\./)[-1]
           word.gsub!(/([A-Z]+)([A-Z][a-z])/, '\1_\2')
@@ -58,20 +58,9 @@ module CiteProc
           word
         end
       end
-      
 
-      #
-      # instance methods
-      #
 
-      def style=(style)
-        @style = Style.load(style.to_s)
-      end
-      
-      def locales=(locale)
-        @locales = { locale.to_sym => Locale.load(locale.to_s) }
-      end
-      
+
       attr_context :processor_version, :csl_version, :opt
 
       alias flags opt
@@ -79,7 +68,7 @@ module CiteProc
       delegate_context %w{ setOutputFormat updateItems updateUncitedItems
         makeBibliography appendCitationCluster processCitationCluster
         previewCitationCluster registry.getSortedRegistryItems }
-        
+
       alias format= set_output_format
       alias bibliography make_bibliography
 
@@ -88,66 +77,70 @@ module CiteProc
       %w{ append process preview }.each do |m|
         alias_method m, "#{m}_citation_cluster"
       end
-      
+
+      # Don't expose all duplicates to public interface
+      private :opt, :append_citation_cluster, :process_citation_cluster,
+        :set_output_format, :make_bibliography, :preview_citation_cluster,
+        :get_sorted_registry_items
+
       def registry
         @registry ||= Hash.new { |h,k| delegate "citeproc.registry.#{k}" }
       end
-      
+
       def citation_registry
         @citation_registry ||= Hash.new { |h,k| registry["citationreg.#{k}"] }
       end
-      
-      def language; options[:locale]; end
-      
-      def start
-        return if started?
-        super
 
-        self.style = processor.options[:style] if @style.nil?
-        self.locales = processor.options[:locale] if @locales.nil?
-
-        @context = ExecJS.compile(Engine.source)
-        update_system
-        
-        delegate "citeproc = new CSL.Engine(system, #{style.inspect}, #{language.inspect})", :exec
-        set_output_format(options[:format])
-        
-        self
-      rescue => e
-        stop
-        raise EngineError.new('failed to start engine', e)
+      # The processor's items converted to citeproc-js format
+      def items
+        Hash[*processor.items.map { |id, item|
+          [id.to_s, item.respond_to?(:to_citeproc) ? item.to_citeproc : item.to_s]
+        }.flatten]
       end
       
-      def stop
-        @context = nil
-        super
+      # The locale put into a hash to make citeproc-js happy
+      def locales
+        { locale.name => locale.to_s }
       end
       
-      def set_abbreviations(namespace)
+      # Sets the abbreviation's namespace, both in Ruby and JS land
+      def namespace=(namespace)
         delegate "citeproc.setAbbreviations(#{ namespace.to_s.inspect })"
-        @default_namespace = namespace.to_sym
+        @namespace = namespace.to_sym
       end
 
-      alias default_namespace= set_abbreviations
-      
+
       private
 
-      def update_system(*arguments)
-        arguments = [:abbreviations, :items, :locales] if arguments.empty?
-        delegate "system.update(#{ MultiJson.encode(Hash[*arguments.flatten.map { |a| [a, send(a)] }.flatten]) })"
+
+      def context
+        @context || compile_context
       end
-      
-      def delegate(script, method = :eval)
-        if running?
-          @context.send(method, script)
-        else
-          warn "not executing script: engine has not been started"
-        end
+
+      def compile_context
+        @context = ExecJS.compile(Engine.source)
+        update_system(:abbreviations, :items, :locales)
+
+        delegate "citeproc = new CSL.Engine(system, #{style.to_s.inspect}, #{locale.name.inspect})", :exec
+        set_output_format(options[:format])
+
+        @context
       rescue => e
-        raise EngineError.new('failed to execute javascript:', e)
+        raise EngineError, "failed to compile engine context: #{e.message}"
       end
-      
+
+      def update_system(*arguments)
+        arguments = arguments.flatten.map { |a| [a, send(a)] }
+        delegate "system.update(#{ MultiJson.encode(Hash[*arguments.flatten]) })"
+      end
+
+      def delegate(script, method = :eval)
+        context.send(method, script)
+      rescue => e
+        raise EngineError, "failed to execute javascript: #{e.message}"
+      end
+
     end
-    
+
   end
 end
